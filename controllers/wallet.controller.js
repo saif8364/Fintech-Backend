@@ -3,8 +3,8 @@ import { errorResponse } from '../utils/errorResponse.js';
 import {successResponse} from '../utils/successResponse.js';
 import { uuidv7 } from 'uuidv7';
 
-// Get wallet by user ID
-export const getWallet = async (req, res) => {
+// Create Wallet for user ID
+export const createWallet = async (req, res) => {
    const {wallet_name, phone_no,wallet_pin} = req.body;
 
    if(wallet_name&&phone_no&&wallet_pin){
@@ -24,8 +24,8 @@ export const getWallet = async (req, res) => {
    
 };
 
-// Create wallet for user
-export const createWallet = async (req, res) => {
+// get wallet for user
+export const getWallet = async (req, res) => {
     try {
         // TODO: Implement createWallet logic
     } catch (error) {
@@ -42,20 +42,5 @@ export const updateWalletBalance = async (req, res) => {
     }
 };
 
-// Delete wallet
-export const deleteWallet = async (req, res) => {
-    try {
-        // TODO: Implement deleteWallet logic
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
 
-// Get wallet balance
-export const getWalletBalance = async (req, res) => {
-    try {
-        // TODO: Implement getWalletBalance logic
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+
