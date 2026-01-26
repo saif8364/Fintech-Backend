@@ -55,5 +55,25 @@ export const getWalletBalance = async (req, res) => {
     }
 };
 
+export const getWalletbyNumber = async (req, res) => {
+    const {phone_no} = req.body;
+    if(!phone_no){
+        return errorResponse(res,"Phone Number is required",401)
+    }
+
+    try {
+        let wallet=await sql `SELECT * FROM wallets WHERE phone_no=${phone_no}`
+        console.log(wallet);
+        
+        if(wallet.length==0){
+            return errorResponse(res,"Wallet not found",404)
+        }
+        successResponse(res, 'Wallet retrieved successfully', wallet);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 
 

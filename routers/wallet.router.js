@@ -3,7 +3,8 @@ import {
     getWallet,
     createWallet,
     updateWalletBalance,
-    getWalletBalance
+    getWalletBalance,
+    getWalletbyNumber
 } from '../controllers/wallet.controller.js';
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.post('/create', createWallet);
 
 // PUT routes
 router.put('/update', updateWalletBalance);
+router.get('/getbyphone', getWalletbyNumber);
 
 
 export default router;
