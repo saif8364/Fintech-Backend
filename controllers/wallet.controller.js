@@ -6,10 +6,15 @@ import { uuidv7 } from 'uuidv7';
 // Create Wallet for user ID
 export const createWallet = async (req, res) => {
    const {wallet_name, phone_no,wallet_pin} = req.body;
+   console.log(req.user.user_id,wallet_name, phone_no,wallet_pin);
+
+   
+
+
 
    if(wallet_name&&phone_no&&wallet_pin){
      try {
-            let query=await sql `INSERT INTO wallets (wallet_id, wallet_name, phone_no, balance, wallet_pin) VALUES (${uuidv7()},${wallet_name},${phone_no},100000,${wallet_pin})`;
+            let query=await sql `INSERT INTO wallets (user_id,wallet_id, wallet_name, phone_no, balance, wallet_pin) VALUES (${req.user.user_id},${uuidv7()},${wallet_name},${phone_no},100000,${wallet_pin})`;
             successResponse(res, 'Wallet created successfully', query);
             
     } catch (error) {
@@ -27,7 +32,7 @@ export const createWallet = async (req, res) => {
 // get wallet for user
 export const getWallet = async (req, res) => {
     try {
-        // TODO: Implement createWallet logic
+        
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -35,6 +40,14 @@ export const getWallet = async (req, res) => {
 
 // Update wallet balance
 export const updateWalletBalance = async (req, res) => {
+    try {
+        // TODO: Implement updateWalletBalance logic
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const getWalletBalance = async (req, res) => {
     try {
         // TODO: Implement updateWalletBalance logic
     } catch (error) {

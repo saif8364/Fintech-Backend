@@ -3,7 +3,6 @@ import {
     getWallet,
     createWallet,
     updateWalletBalance,
-    deleteWallet,
     getWalletBalance
 } from '../controllers/wallet.controller.js';
 
@@ -19,7 +18,5 @@ router.post('/create', createWallet);
 // PUT routes
 router.put('/update', updateWalletBalance);
 
-// DELETE routes
-router.delete('/delete/:id', deleteWallet);
 
 export default router;
