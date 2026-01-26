@@ -5,12 +5,9 @@ import { uuidv7 } from 'uuidv7';
 
 // Create Wallet for user ID
 export const createWallet = async (req, res) => {
+
    const {wallet_name, phone_no,wallet_pin} = req.body;
    console.log(req.user.user_id,wallet_name, phone_no,wallet_pin);
-
-   
-
-
 
    if(wallet_name&&phone_no&&wallet_pin){
      try {
@@ -32,6 +29,8 @@ export const createWallet = async (req, res) => {
 // get wallet for user
 export const getWallet = async (req, res) => {
     try {
+        let wallet=await sql `SELECT * FROM wallets WHERE user_id=${req.user.user_id}`
+        successResponse(res, 'Wallet retrieved successfully', wallet);
         
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -49,7 +48,8 @@ export const updateWalletBalance = async (req, res) => {
 
 export const getWalletBalance = async (req, res) => {
     try {
-        // TODO: Implement updateWalletBalance logic
+        let balance=await sql `SELECT balance FROM wallets WHERE user_id=${req.user.user_id}`
+        successResponse(res, 'Balance retrieved successfully', balance);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
