@@ -1,4 +1,4 @@
-import sql from '../db.js';
+import {sql} from '../db.js';
 
 // Get all loans
 export const getLoans = async (req, res) => {

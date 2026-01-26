@@ -1,13 +1,17 @@
 import postgres from 'postgres'
+import { configDotenv } from 'dotenv';
+configDotenv();
 
 const connectionString = process.env.DATABASE_URL
-let sql=null
+let sql;
 try {
      sql = await postgres(connectionString)
-     console.log('DataBase Connected');
-     
+     console.log('DataBase Connected',sql);
 } catch (error) {
-    console.error('Failed to connect to the database:', error)
+    console.log('Error while connecting to database',error);
+    
 }
+   
 
-export default sql
+
+export {sql}

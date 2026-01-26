@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 // GET routes
-router.get('/', getWallet);
+router.get('/getwallet', getWallet);
 router.get('/balance', getWalletBalance);
 
 // POST routes
