@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/wallet',verifyIdToken, walletRouter);
-app.use('/transaction', transactionRouter);
+app.use('/transaction', verifyIdToken,transactionRouter);
 app.use('/loan', loanRouter);
 
 
