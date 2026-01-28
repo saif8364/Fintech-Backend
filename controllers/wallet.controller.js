@@ -2,6 +2,9 @@ import {sql} from '../db.js';
 import { errorResponse } from '../utils/errorResponse.js';
 import {successResponse} from '../utils/successResponse.js';
 import { uuidv7 } from 'uuidv7';
+import { getRedis } from '../utils/redis_server.js';
+
+let redisClient = await getRedis()
 
 // Create Wallet for user ID
 export const createWallet = async (req, res) => {
@@ -28,8 +31,16 @@ export const createWallet = async (req, res) => {
 
 // get wallet for user
 export const getWallet = async (req, res) => {
+    let cached=await redisClient.get(`wallet_${req.user.user_id}`);
+    if(cached){
+        return successResponse(res, 'Wallet retrieved successfully', cached);
+    }
+
     try {
         let wallet=await sql `SELECT * FROM wallets WHERE user_id=${req.user.user_id}`
+        let data=await redisClient.set(`wallet_${req.user.user_id}`, JSON.stringify(wallet), { EX: 7200 }); 
+        console.log("data saved in redis:",data );
+             
         successResponse(res, 'Wallet retrieved successfully', wallet);
         
     } catch (error) {
@@ -57,6 +68,13 @@ export const getWalletBalance = async (req, res) => {
 
 export const getWalletbyNumber = async (req, res) => {
     const {phone_no} = req.body;
+
+    let cached=await redisClient.get(`wallet_phone_${phone_no}`);
+    if(cached){
+        console.log('cache hit',cached);
+        return successResponse(res, 'Wallet retrieved successfully(from redis)', cached);
+    }
+
     if(!phone_no){
         return errorResponse(res,"Phone Number is required",401)
     }
@@ -68,6 +86,8 @@ export const getWalletbyNumber = async (req, res) => {
         if(wallet.length==0){
             return errorResponse(res,"Wallet not found",404)
         }
+        let data=await redisClient.set(`wallet_phone_${phone_no}`, JSON.stringify(wallet), { EX: 7200 });
+        console.log("data saved in redis:",data );
         successResponse(res, 'Wallet retrieved successfully', wallet);
     } catch (error) {
         res.status(500).json({ error: error.message });

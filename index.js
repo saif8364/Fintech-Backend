@@ -1,7 +1,6 @@
 import { verifyIdToken } from './middlewares/firebase.js';
 import { configDotenv } from 'dotenv';
 import express from 'express';
-import loanRouter from './routers/loan.router.js';
 import transactionRouter from './routers/transaction.router.js';
 import walletRouter from './routers/wallet.router.js';
 
@@ -12,9 +11,9 @@ configDotenv();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/wallet',verifyIdToken, walletRouter);
+app.use('/wallet', walletRouter);
 app.use('/transaction', verifyIdToken,transactionRouter);
-app.use('/loan', loanRouter);
+
 
 
 const PORT = process.env.PORT || 5000;

@@ -6,7 +6,7 @@ import {
 
 const router = express.Router();
 
-router.get('/history/:userId', getTransactionHistory);
+router.get('/history', getTransactionHistory);
 router.post('/create', createTransaction);
 
 
