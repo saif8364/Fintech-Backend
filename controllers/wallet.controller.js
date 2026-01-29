@@ -120,6 +120,25 @@ export const changePin = async (req, res) => {
     }
 }
 
+export const verifyPin = async (req, res) => {
+    try {
+        const {wallet_pin} = req.body;
+        if(!wallet_pin){
+            return errorResponse(res, "Wallet pin is required", 401);
+        }
+        const hashedpin=await sql `Select wallet_pin FROM wallets WHERE user_id=${req.user.user_id}`;
+        const validatePin=await comparePassword(wallet_pin,hashedpin[0].wallet_pin);
+        if(!validatePin){
+            return errorResponse(res, "Wallet pin is incorrect", 401);
+        }
+        successResponse(res, 'Pin verified successfully', null);
+
+    } catch (error) {
+       return errorResponse(res, error.message, 500);
+    }
+}
+
+
 export const changeUsername = async (req, res) => {
     const {new_username} = req.body;
    try {
@@ -134,6 +153,8 @@ export const changeUsername = async (req, res) => {
        return errorResponse(res, error.message, 500);
    }
 }
+
+
 
 
 
