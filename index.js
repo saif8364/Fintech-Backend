@@ -11,7 +11,7 @@ configDotenv();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/wallet', walletRouter);
+app.use('/wallet', verifyIdToken,walletRouter);
 app.use('/transaction', verifyIdToken,transactionRouter);
 
 
