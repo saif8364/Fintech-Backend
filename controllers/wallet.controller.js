@@ -51,14 +51,7 @@ export const getWallet = async (req, res) => {
     }
 };
 
-// Update wallet balance
-export const updateWalletBalance = async (req, res) => {
-    try {
-        // TODO: Implement updateWalletBalance logic
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+
 
 export const getWalletBalance = async (req, res) => {
     try {
