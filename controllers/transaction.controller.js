@@ -73,7 +73,7 @@ export const createTransaction = async (req, res) => {
 //will optimize later with caching
 export const getTransactionHistory = async (req, res) => {
     try {
-        let transactions=await sql `SELECT * FROM transactions WHERE sender_wallet_id IN (SELECT wallet_id FROM wallets WHERE user_id=${req.user.user_id}) OR recipient_wallet_id IN (SELECT wallet_id FROM wallets WHERE user_id=${req.user.user_id}) ORDER BY created_at DESC`
+        let transactions=await sql `SELECT * FROM transactions WHERE from_wallet_id IN (SELECT wallet_id FROM wallets WHERE user_id=${req.user.user_id}) OR to_wallet_id IN (SELECT wallet_id FROM wallets WHERE user_id=${req.user.user_id}) ORDER BY created_at DESC`
         successResponse(res, 'Transaction history retrieved successfully', transactions);
     } catch (error) {
         res.status(500).json({ error: error.message });

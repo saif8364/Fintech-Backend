@@ -12,22 +12,36 @@ let redisClient = await getRedis()
 export const createWallet = async (req, res) => {
 
    const {wallet_name, phone_no,wallet_pin} = req.body;
-   const hashedPin=await hashPassword(wallet_pin);
    console.log(req.user.user_id,wallet_name, phone_no,wallet_pin);
 
-   if(wallet_name&&phone_no&&wallet_pin){
+   if(!wallet_name||!phone_no||!wallet_pin){
+    errorResponse(res,'All fields required ',401)
+   }
+
+    let user=await sql `Select wallet_id from wallets where user_id=${req.user.user_id}`
+    console.log(user);
+   if(user.length!=0){
+   return errorResponse(res,'Already have a wallet ',401)
+   }
+
+
+      const hashedPin=await hashPassword(wallet_pin);
+
      try {
-            let query=await sql `INSERT INTO wallets (user_id,wallet_id, wallet_name, phone_no, balance, wallet_pin) VALUES (${req.user.user_id},${uuidv7()},${hashedPin})`;
+            let query=await sql `INSERT INTO wallets (user_id,wallet_id, wallet_name, phone_no, balance, wallet_pin) VALUES (${req.user.user_id},${uuidv7()},${wallet_name},${phone_no},0,${hashedPin})`;
             successResponse(res, 'Wallet created successfully', query);
             
     } catch (error) {
-        res.status(500).json({ error: error.message });
+
+        if(error.code=='23505'){
+            errorResponse(res,'This phone number already exists.',401)
+        }
+        else{
+            errorResponse(res,'SomeThing went wrong',401)
+        }
     }
 
-   }
-   else{
-    errorResponse(res,"All Fields Required",401)
-   }
+  
 
    
 };
@@ -65,15 +79,17 @@ export const getWalletBalance = async (req, res) => {
 export const getWalletbyNumber = async (req, res) => {
     const {phone_no} = req.body;
 
+     if(!phone_no){
+        return errorResponse(res,"Phone Number is required",401)
+    }
+
     let cached=await redisClient.get(`wallet_phone_${phone_no}`);
     if(cached){
         console.log('cache hit',cached);
         return successResponse(res, 'Wallet retrieved successfully(from redis)', cached);
     }
 
-    if(!phone_no){
-        return errorResponse(res,"Phone Number is required",401)
-    }
+   
 
     try {
         let wallet=await sql `SELECT * FROM wallets WHERE phone_no=${phone_no}`
@@ -97,6 +113,10 @@ export const changePin = async (req, res) => {
         if(!old_pin || !new_pin){
             return errorResponse(res, "Old pin and new pin are required", 401);
         }
+        if(old_pin==new_pin){
+            return errorResponse(res,"Old and New pin cannot be same")
+        }
+
         const hashedNewPin=await hashPassword(new_pin);
         const oldhashedpin=await sql `Select wallet_pin FROM wallets WHERE user_id=${req.user.user_id}`;
         const validateOldPin=await comparePassword(old_pin,oldhashedpin[0].wallet_pin);
@@ -139,7 +159,7 @@ export const changeUsername = async (req, res) => {
     if(!new_username){
         return errorResponse(res, "New username is required", 401);
     }
-    await sql `UPDATE users SET username=${new_username} WHERE user_id=${req.user.user_id}`;
+    await sql `UPDATE wallets SET wallet_name=${new_username} WHERE user_id=${req.user.user_id}`;
     successResponse(res, 'Username changed successfully', null);
 
    } catch (error) {

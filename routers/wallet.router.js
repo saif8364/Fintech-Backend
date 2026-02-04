@@ -8,7 +8,7 @@ import {
     changeUsername,
     verifyPin
 } from '../controllers/wallet.controller.js';
-import { changelimiter } from '../middlewares/rateLimit.middleware.js';
+import { changeusername_limiter,changepin_limiter } from '../middlewares/rateLimit.middleware.js';
 
 const router = express.Router();
 
@@ -17,12 +17,12 @@ router.get('/getwallet', getWallet);
 router.get('/getbalance', getWalletBalance);
 
 // POST routes
-router.post('/create', createWallet);
+router.post('/createwallet', createWallet);
 
 // PUT routes
 router.get('/getbyphone', getWalletbyNumber);
-router.post('/changepin', changelimiter, changePin);
-router.post('/changeusername', changelimiter, changeUsername);
+router.post('/changepin', changepin_limiter, changePin);
+router.post('/changeusername', changeusername_limiter, changeUsername);
 router.get('/verifyPin',verifyPin);
 
 
