@@ -6,15 +6,25 @@ This project demonstrates how modern fintech backends maintain **data integrity*
 
 ---
 
+## 🧱 Core Concepts
+
+- Wallet-based balance system
+- Authenticated user access using Firebase Authentication
+- Atomic transactions with database-level locking
+- Connection pooling for efficient database access
+- Centralized error handling
+- Rate limiting on sensitive operations
+
 ## 🚀 Tech Stack
 
+
 - **Backend:** Node.js (Express)
-- **Database:** PostgreSQL
-- **Authentication:** Firebase Authentication
+- **Database:** PostgreSQL with connection pooling(Supabase)
+- **Caching:** Redis (Upstash)
+- **Authentication:** Firebase Auth (Service Account)
 - **API Style:** REST
-- **Security:** Rate limiting, PIN hashing
-- **Identifiers:** UUID version 7
-- **Data Safety:** Database transactions & row-level locking
+- **Security:** Rate limiting, Pin Hashing
+- **Data Safety:** Transactions & locking
 
 ---
 
@@ -78,53 +88,44 @@ This protects against abuse, brute-force attacks, and accidental misuse.
 
 - All balance updates are executed inside database transactions.
 - Row-level locking prevents race conditions.
+- Redis cache prevents repeated wallet DB queries
 - Ensures:
   - Accurate balance updates.
   - Safe concurrent transactions.
   - Automatic rollback on failure.
 - This approach mirrors production-grade fintech systems.
 
-## 🔐 Security Practices
 
-### UUID v7
-- UUID version 7 is used for all primary keys.
-- Time-ordered UUIDs improve index performance.
-- Ensures uniqueness across distributed systems.
-
-### PIN Hashing
-- Wallet PINs are never stored in plain text.
-- PINs are hashed using a secure one-way hashing algorithm.
-- Each PIN is salted before hashing.
-- PIN verification uses secure hash comparison.
-
-## ❗ Error Handling
-- All API responses follow a consistent structure.
-- Raw database errors are logged internally.
-- Clients receive clean, user-safe error messages.
-- Internal implementation details are never exposed.
 
 ## 🛠️ Setup & Installation
-git clone https://github.com/your-username/fintech-wallet-backend.git 
-dd fintech-wallet-backend 
-npm install
 
-### Environment Variables
-dATABASE_URL=postgresql://user:password@localhost:5432/dbname 
-firebase_project_id=your_firebase_project_id 
+```bash
+git clone https://github.com/saif8364/Fintech-Backend.git
+cd Fintech-Backend
+npm install
+```
+
+### Set environment variables:
+
+```plaintext
+PORT=5000
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+REDIS_URL=your_upstash_redis_url
+REDIS_TOKEN=your_upstash_redis_token
+```
+
+### Add Firebase service account key:
+
+- Download service account JSON from Firebase.
+- Place it in `middleware/firebase.js` (update path if needed).
 
 ### Run the server:
-npm run dev
 
+```bash
+npm run dev
+```
 ---
 
-## 🚧 Future Enhancements
-default:
-tx reversal,
-admin dashboard,
-audit logging,
-swagger / openapi documentation,
-wbhook support,
-documentation of schema images before upload. 
 
 
 ```md
