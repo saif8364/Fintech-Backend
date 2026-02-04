@@ -12,18 +12,17 @@ import { changeusername_limiter,changepin_limiter } from '../middlewares/rateLim
 
 const router = express.Router();
 
-// GET routes
+// GET 
 router.get('/getwallet', getWallet);
 router.get('/getbalance', getWalletBalance);
+router.get('/getbyphone', getWalletbyNumber);
+routesrouter.get('/verifyPin',verifyPin);
 
 // POST routes
 router.post('/createwallet', createWallet);
-
-// PUT routes
-router.get('/getbyphone', getWalletbyNumber);
 router.post('/changepin', changepin_limiter, changePin);
 router.post('/changeusername', changeusername_limiter, changeUsername);
-router.get('/verifyPin',verifyPin);
+
 
 
 
