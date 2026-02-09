@@ -4,6 +4,7 @@ import {
     createWallet,
     getWalletBalance,
     getWalletbyNumber,
+    getWalletwithoutCached,
     changePin,
     changeUsername,
     verifyPin
@@ -14,9 +15,10 @@ const router = express.Router();
 
 // GET 
 router.get('/getwallet', getWallet);
+router.get('/getwalletwithoutcached', getWalletwithoutCached);
 router.get('/getbalance', getWalletBalance);
 router.get('/getbyphone', getWalletbyNumber);
-routesrouter.get('/verifyPin',verifyPin);
+router.get('/verifyPin',verifyPin);
 
 // POST routes
 router.post('/createwallet', createWallet);

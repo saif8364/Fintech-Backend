@@ -10,7 +10,9 @@ configDotenv();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.get('/', (req, res) => {
+    res.send('Welcome to the Wallet and Transaction API');
+});
 app.use('/wallet', verifyIdToken,walletRouter);
 app.use('/transaction', verifyIdToken,transactionRouter);
 

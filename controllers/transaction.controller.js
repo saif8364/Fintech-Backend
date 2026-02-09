@@ -59,7 +59,7 @@ export const createTransaction = async (req, res) => {
         ) 
         
        
-        successResponse(res, 'Transaction created successfully',tx_id );
+        successResponse(res,tx_id ,'Transaction created successfully');
 
     } catch (error) {
         console.log("Error:",error);
@@ -74,7 +74,7 @@ export const createTransaction = async (req, res) => {
 export const getTransactionHistory = async (req, res) => {
     try {
         let transactions=await sql `SELECT * FROM transactions WHERE from_wallet_id IN (SELECT wallet_id FROM wallets WHERE user_id=${req.user.user_id}) OR to_wallet_id IN (SELECT wallet_id FROM wallets WHERE user_id=${req.user.user_id}) ORDER BY created_at DESC`
-        successResponse(res, 'Transaction history retrieved successfully', transactions);
+        successResponse(res, transactions, 'Transaction history retrieved successfully');
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

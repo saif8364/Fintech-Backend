@@ -4,6 +4,7 @@ import {successResponse} from '../utils/successResponse.js';
 import { uuidv7 } from 'uuidv7';
 import { getRedis } from '../utils/redis_server.js';
 import { hashPassword ,comparePassword} from '../utils/passwordHashing.js';
+import { log } from 'console';
 
 
 let redisClient = await getRedis()
@@ -28,8 +29,8 @@ export const createWallet = async (req, res) => {
       const hashedPin=await hashPassword(wallet_pin);
 
      try {
-            let query=await sql `INSERT INTO wallets (user_id,wallet_id, wallet_name, phone_no, balance, wallet_pin) VALUES (${req.user.user_id},${uuidv7()},${wallet_name},${phone_no},0,${hashedPin})`;
-            successResponse(res, 'Wallet created successfully', query);
+            let query=await sql `INSERT INTO wallets (user_id,wallet_id, wallet_name, phone_no, balance, wallet_pin) VALUES (${req.user.user_id},${uuidv7()},${wallet_name},${phone_no},0,${hashedPin}) RETURNING *`;
+            successResponse(res, query,'Wallet created successfully');
             
     } catch (error) {
 
@@ -50,15 +51,34 @@ export const createWallet = async (req, res) => {
 export const getWallet = async (req, res) => {
     let cached=await redisClient.get(`wallet_${req.user.user_id}`);
     if(cached){
-        return successResponse(res, 'Wallet retrieved successfully', cached);
+        log('cache hit',cached);
+        return successResponse(res, cached, 'Wallet retrieved successfully');
     }
+    console.log('entered getwallet');
+    
+    try {
+        let wallet=await sql `SELECT * FROM wallets WHERE user_id=${req.user.user_id} `
+        if(wallet.length==0){
+            log('wallet not found');
+            return errorResponse(res,"Wallet not found",404)
+        }
+        let data=await redisClient.set(`wallet_${req.user.user_id}`, JSON.stringify(wallet), { EX: 2500 }); 
+        console.log("data saved in redis:",wallet);
+        successResponse(res, wallet, 'Wallet retrieved successfully');
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
+export const getWalletwithoutCached = async (req, res) => {
+    
     try {
         let wallet=await sql `SELECT * FROM wallets WHERE user_id=${req.user.user_id}`
-        let data=await redisClient.set(`wallet_${req.user.user_id}`, JSON.stringify(wallet), { EX: 80000 }); 
-        console.log("data saved in redis:",data );
-             
-        successResponse(res, 'Wallet retrieved successfully', wallet);
+        let data=await redisClient.set(`wallet_${req.user.user_id}`, JSON.stringify(wallet), { EX: 2500 }); 
+        console.log("data saved in redis:",wallet);
+        
+        successResponse(res, wallet, 'Wallet retrieved successfully');
         
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -70,7 +90,7 @@ export const getWallet = async (req, res) => {
 export const getWalletBalance = async (req, res) => {
     try {
         let balance=await sql `SELECT balance FROM wallets WHERE user_id=${req.user.user_id}`
-        successResponse(res, 'Balance retrieved successfully', balance);
+        successResponse(res, balance, 'Balance retrieved successfully');
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -86,7 +106,7 @@ export const getWalletbyNumber = async (req, res) => {
     let cached=await redisClient.get(`wallet_phone_${phone_no}`);
     if(cached){
         console.log('cache hit',cached);
-        return successResponse(res, 'Wallet retrieved successfully(from redis)', cached);
+        return successResponse(res, cached, 'Wallet retrieved successfully(from redis)');
     }
 
    
@@ -100,7 +120,7 @@ export const getWalletbyNumber = async (req, res) => {
         }
         let data=await redisClient.set(`wallet_phone_${phone_no}`, JSON.stringify(wallet), { EX: 3600 });
         console.log("data saved in redis:",data );
-        successResponse(res, 'Wallet retrieved successfully', wallet);
+        successResponse(res, wallet, 'Wallet retrieved successfully');
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -126,7 +146,7 @@ export const changePin = async (req, res) => {
         }
 
         await sql `UPDATE wallets SET wallet_pin=${hashedNewPin} WHERE user_id=${req.user.user_id}`;
-        successResponse(res, 'Pin changed successfully', null);
+        successResponse(res, 'Pin changed successfully');
 
     } catch (error) {
      return errorResponse(res, error.message, 500);
@@ -144,7 +164,7 @@ export const verifyPin = async (req, res) => {
         if(!validatePin){
             return errorResponse(res, "Wallet pin is incorrect", 401);
         }
-        successResponse(res, 'Pin verified successfully', null);
+        successResponse(res, 'Wallet pin verified successfully');
 
     } catch (error) {
        return errorResponse(res, error.message, 500);
@@ -160,7 +180,7 @@ export const changeUsername = async (req, res) => {
         return errorResponse(res, "New username is required", 401);
     }
     await sql `UPDATE wallets SET wallet_name=${new_username} WHERE user_id=${req.user.user_id}`;
-    successResponse(res, 'Username changed successfully', null);
+    successResponse(res, 'Username changed successfully');
 
    } catch (error) {
        return errorResponse(res, error.message, 500);
