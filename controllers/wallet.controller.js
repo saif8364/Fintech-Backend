@@ -1,10 +1,8 @@
 import {sql} from '../db.js';
 import { errorResponse } from '../utils/errorResponse.js';
 import {successResponse} from '../utils/successResponse.js';
-import { uuidv7 } from 'uuidv7';
 import { getRedis } from '../utils/redis_server.js';
 import { hashPassword ,comparePassword} from '../utils/passwordHashing.js';
-import { log } from 'console';
 
 
 let redisClient = await getRedis()
@@ -19,7 +17,7 @@ export const createWallet = async (req, res) => {
     errorResponse(res,'All fields required ',401)
    }
 
-    let user=await sql `Select wallet_id from wallets where user_id=${req.user.user_id}`
+    let user=await sql `Select wallet_id from wallets where wallet_id=${req.user.user_id}`
     console.log(user);
    if(user.length!=0){
    return errorResponse(res,'Already have a wallet ',401)
@@ -29,7 +27,7 @@ export const createWallet = async (req, res) => {
       const hashedPin=await hashPassword(wallet_pin);
 
      try {
-            let query=await sql `INSERT INTO wallets (user_id,wallet_id, wallet_name, phone_no, balance, wallet_pin) VALUES (${req.user.user_id},${uuidv7()},${wallet_name},${phone_no},0,${hashedPin}) RETURNING *`;
+            let query=await sql `INSERT INTO wallets (wallet_id, wallet_name, phone_no, balance, wallet_pin) VALUES (${req.user.user_id},${wallet_name},${phone_no},0,${hashedPin}) RETURNING *`;
             successResponse(res, query,'Wallet created successfully');
             
     } catch (error) {
@@ -57,7 +55,7 @@ export const getWallet = async (req, res) => {
     console.log('entered getwallet');
     
     try {
-        let wallet=await sql `SELECT * FROM wallets WHERE user_id=${req.user.user_id} `
+        let wallet=await sql `SELECT * FROM wallets WHERE wallet_id=${req.user.user_id} `
         if(wallet.length==0){
             log('wallet not found');
             return errorResponse(res,"Wallet not found",404)
@@ -74,7 +72,7 @@ export const getWallet = async (req, res) => {
 export const getWalletwithoutCached = async (req, res) => {
     
     try {
-        let wallet=await sql `SELECT * FROM wallets WHERE user_id=${req.user.user_id}`
+        let wallet=await sql `SELECT * FROM wallets WHERE wallet_id=${req.user.user_id}`
         let data=await redisClient.set(`wallet_${req.user.user_id}`, JSON.stringify(wallet), { EX: 2500 }); 
         console.log("data saved in redis:",wallet);
         
@@ -89,7 +87,7 @@ export const getWalletwithoutCached = async (req, res) => {
 
 export const getWalletBalance = async (req, res) => {
     try {
-        let balance=await sql `SELECT balance FROM wallets WHERE user_id=${req.user.user_id}`
+        let balance=await sql `SELECT balance FROM wallets WHERE wallet_id=${req.user.user_id}`
         successResponse(res, balance, 'Balance retrieved successfully');
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -138,14 +136,14 @@ export const changePin = async (req, res) => {
         }
 
         const hashedNewPin=await hashPassword(new_pin);
-        const oldhashedpin=await sql `Select wallet_pin FROM wallets WHERE user_id=${req.user.user_id}`;
+        const oldhashedpin=await sql `Select wallet_pin FROM wallets WHERE wallet_id=${req.user.user_id}`;
         const validateOldPin=await comparePassword(old_pin,oldhashedpin[0].wallet_pin);
 
         if(!validateOldPin){
             return errorResponse(res, "Old pin is incorrect", 401);
         }
 
-        await sql `UPDATE wallets SET wallet_pin=${hashedNewPin} WHERE user_id=${req.user.user_id}`;
+        await sql `UPDATE wallets SET wallet_pin=${hashedNewPin} WHERE wallet_id=${req.user.user_id}`;
         successResponse(res, 'Pin changed successfully');
 
     } catch (error) {
@@ -159,7 +157,7 @@ export const verifyPin = async (req, res) => {
         if(!wallet_pin){
             return errorResponse(res, "Wallet pin is required", 401);
         }
-        const hashedpin=await sql `Select wallet_pin FROM wallets WHERE user_id=${req.user.user_id}`;
+        const hashedpin=await sql `Select wallet_pin FROM wallets WHERE wallet_id=${req.user.user_id}`;
         const validatePin=await comparePassword(wallet_pin,hashedpin[0].wallet_pin);
         if(!validatePin){
             return errorResponse(res, "Wallet pin is incorrect", 401);
@@ -179,7 +177,7 @@ export const changeUsername = async (req, res) => {
     if(!new_username){
         return errorResponse(res, "New username is required", 401);
     }
-    await sql `UPDATE wallets SET wallet_name=${new_username} WHERE user_id=${req.user.user_id}`;
+    await sql `UPDATE wallets SET wallet_name=${new_username} WHERE wallet_id=${req.user.user_id}`;
     successResponse(res, 'Username changed successfully');
 
    } catch (error) {
